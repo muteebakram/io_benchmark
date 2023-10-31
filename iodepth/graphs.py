@@ -1,98 +1,108 @@
+import pandas as pd
 import matplotlib.pyplot as plt
 
-# X and Y axis values to be present on graph.
-x_ticks = [1000, 2000, 3000, 4000]
-y_ticks = [0, 25, 50, 75, 100]
 
-# Constant number of entries for x axis
-num_of_entries = [128, 1024, 4096]
+def read_iops():
+    # queue_depth = ["1", "2", "4", "8"]
+    queue_depth = ["1", "2", "4", "8", "16", "32", "64", "128"]
 
+    read_iops = pd.DataFrame(
+        {
+            "libaio": [
+                39445.443645,
+                13702.119152,
+                16390.121976,
+                22657.337065,
+                30037.584966,
+                10663.467307,
+                6628.074385,
+                20300.739852,
+            ],
+            "iouring": [
+                20928.014397,
+                39835.665734,
+                6535.092981,
+                10971.205759,
+                16407.518496,
+                14633.873225,
+                31114.954018,
+                20203.118752,
+            ],
+            "iouring_iopoll": [10, 20, 30, 40, 50, 60, 70, 80],
+            "iouring_sqpoll": [
+                6929.014197,
+                31330.867653,
+                19967.426059,
+                16248.75025,
+                13470.211915,
+                39993.802479,
+                10736.252749,
+                21177.364527,
+            ],
+        },
+        index=queue_depth,
+    )
 
-def plot_benchmark(name, local_accuracy, gshare_accuracy, tournament_accuracy):
+    read_iops.plot(kind="bar", figsize=(15, 8))
+    plt.xlabel("Queue depth")
+    plt.ylabel("Read KFLOPs")
+    plt.title("I/O protocol vs Queue depth")
+
     fig = plt.figure()
-
-    # Plot the data
-    plt.plot(num_of_entries, local_accuracy, label="Local Predictor", marker='x')
-    plt.plot(num_of_entries, gshare_accuracy, label="Gshare Predictor", marker='x')
-    plt.plot(num_of_entries, tournament_accuracy, label="Tournament Predictor", marker='x')
-
-    # plt.xticks(x_ticks)
-    # plt.yticks(y_ticks, ['0.00%', '25.00%', '50.00%', '75.00%', '100.00%'])
-
-    # Add a legend
-    plt.legend()
-
-    # Label the x-axis & y-axis
-    plt.xlabel("PHT Entries")
-    plt.ylabel("Prediction Accuracy")
-    
-    # Add title to graph
-    plt.title(name)
-
-    # Show the plot
-    # plt.show()
-
-    # Save the figure
-    fig.savefig("{0}.png".format(name.replace(" ", "_")))
+    plt.show()
+    # fig.savefig("figs/read_iops_vs_iodepth.png")
 
 
-def sjeng():
-    Sjeng_local_128 = 78.8667
-    Sjeng_local_1024 = 81.2021
-    Sjeng_local_4096 = 82.3824
-    Sjeng_local = [ Sjeng_local_128, Sjeng_local_1024, Sjeng_local_4096 ]
+def write_iops():
+    # queue_depth = ["1", "2", "4", "8"]
+    queue_depth = ["1", "2", "4", "8", "16", "32", "64", "128"]
 
-    Sjeng_gshare_128 = 68.7212
-    Sjeng_gshare_1024 = 78.5808
-    Sjeng_gshare_4096 = 86.0448
-    Sjeng_gshare = [ Sjeng_gshare_128, Sjeng_gshare_1024, Sjeng_gshare_4096 ]
+    write_iops = pd.DataFrame(
+        {
+            "libaio": [
+                39335.931255,
+                13721.111555,
+                16491.10178,
+                22661.935226,
+                30180.327869,
+                10607.678464,
+                6596.880624,
+                20350.129974,
+            ],
+            "iouring": [
+                20962.807439,
+                39711.115554,
+                6503.69926,
+                10912.617477,
+                16497.90042,
+                14673.665267,
+                31228.308677,
+                20215.313874,
+            ],
+            "iouring_iopoll": [10, 20, 30, 40, 50, 60, 70, 80],
+            "iouring_sqpoll": [
+                6877.624475,
+                31498.20072,
+                20018.984812,
+                16328.534293,
+                13476.009596,
+                39875.84966,
+                10687.262547,
+                21185.962807,
+            ],
+        },
+        index=queue_depth,
+    )
 
-    Sjeng_Tournament_128 = 78.1657
-    Sjeng_Tournament_1024 = 83.7628
-    Sjeng_Tournament_4096 = 87.711
-    Sjeng_Tournament = [ Sjeng_Tournament_128, Sjeng_Tournament_1024, Sjeng_Tournament_4096 ]
-    
-    plot_benchmark("Benchmark Sjeng", Sjeng_local, Sjeng_gshare, Sjeng_Tournament)
+    write_iops.plot(kind="bar", figsize=(15, 8))
+    plt.xlabel("Queue depth")
+    plt.ylabel("Write KFLOPs")
+    plt.title("I/O protocol vs Queue depth")
 
-
-def gobmk():
-    Gobmk_local_128 = 74.0507
-    Gobmk_local_1024 = 75.1141
-    Gobmk_local_4096 = 75.7733
-    Gobmk_local = [ Gobmk_local_128, Gobmk_local_1024, Gobmk_local_4096 ]
-
-    Gobmk_gshare_128 = 69.0445
-    Gobmk_gshare_1024 = 75.4056
-    Gobmk_gshare_4096 = 80.2168
-    Gobmk_gshare = [ Gobmk_gshare_128, Gobmk_gshare_1024, Gobmk_gshare_4096 ]
-
-    Gobmk_Tournament_128 = 74.1412
-    Gobmk_Tournament_1024 = 78.5362
-    Gobmk_Tournament_4096 = 81.939
-    Gobmk_Tournament = [ Gobmk_Tournament_128, Gobmk_Tournament_1024, Gobmk_Tournament_4096 ]
-
-    plot_benchmark("Benchmark GOBMK", Gobmk_local, Gobmk_gshare, Gobmk_Tournament)
-
-
-def matrix_mul():
-    Matrix_Mul_local_128 = 99.6393
-    Matrix_Mul_local_1024 = 99.6454
-    Matrix_Mul_local_4096 = 99.6393
-    Matrix_Mul_local = [ Matrix_Mul_local_128, Matrix_Mul_local_1024, Matrix_Mul_local_4096 ]
-
-    Matrix_Mul_gshare_128 = 99.2759
-    Matrix_Mul_gshare_1024 = 99.5476
-    Matrix_Mul_gshare_4096 = 99.6116
-    Matrix_Mul_gshare = [ Matrix_Mul_gshare_128, Matrix_Mul_gshare_1024, Matrix_Mul_gshare_4096 ]
-
-    Matrix_Mul_Tournament_128 = 99.6268
-    Matrix_Mul_Tournament_1024 = 99.6529
-    Matrix_Mul_Tournament_4096 = 99.6688
-    Matrix_Mul_Tournament = [ Matrix_Mul_Tournament_128, Matrix_Mul_Tournament_1024, Matrix_Mul_Tournament_4096 ]
-    
-    plot_benchmark("Benchmark Matrix Multiplication", Matrix_Mul_local, Matrix_Mul_gshare, Matrix_Mul_Tournament)
+    fig = plt.figure()
+    plt.show()
+    # fig.savefig("figs/write_iops_vs_iodepth.png")
 
 
-sjeng()
-gobmk()
-matrix_mul()
+read_iops()
+write_iops()
