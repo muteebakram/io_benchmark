@@ -50,6 +50,9 @@ EXPERIMENT_LIST = {
         },
         "iou+k": {
             "flags":  ["--numjobs=2", "--ioengine=io_uring", "--sqthread_poll", "--sqthread_poll_cpu=1", "--cpus_allowed=1,2"]
+        },
+        "iou+ke": {
+            "flags":  ["--numjobs=2", "--ioengine=io_uring", "--sqthread_poll", "--sqthread_poll_cpu=1", "--cpus_allowed=2"]
         }
     }
 }
