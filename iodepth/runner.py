@@ -6,7 +6,7 @@ import json
 
 #TODO: Make this a flag.
 FIO_BIN = "fio" # Assumes FIO is in $PATH. 
-RESULT_PATH = "iodepth/iodepth_results.json" 
+RESULT_PATH = "iodepth_results.json"
 
 common_flags = [
     "--time_based", 
