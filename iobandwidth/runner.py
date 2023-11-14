@@ -34,7 +34,7 @@ io_depths = [1, 4, 16, 64, 128]
 
 # Number of CPU cores to be utilized to initiate fio task.
 # cpus_allowed = [1]
-cpus_allowed = [1, 2, 4, 8, 16, 32]
+cpus_allowed = [2, 4, 8, 16, 32]
 
 EXPERIMENT_LIST = {
     "CoresVsIOBandwidth": {
@@ -63,7 +63,7 @@ def run_experiment(experiment_name, experiments):
                     process += [f"--name={experiment_name}_{tc_name}"]
                     process += ["--filename=data/input_data"]
                     process += [f"--numjobs={cpus}"]
-                    process += [f"--cpus_allowed=0-{cpus}"]
+                    process += [f"--cpus_allowed=0-{cpus - 1}"]  # CPUs start with 0.
                     process += params["flags"]
                     # For iou+k, add number of kernel threads to be used for kernel polling.
                     if tc_name == "iou+k":
