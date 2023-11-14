@@ -14,7 +14,7 @@ common_flags = [
     "--ramp_time=4",
     "--output-format=json",
     # fio size for i/o input operation file.at=json",
-    "--size=10M",
+    "--size=1G",
     # fio forces to use direct buffer i.e, read/write to the disk without cache.
     # Used to evaluate drive performance but not real world as cache play important role for speed up.
     "--direct=1",
