@@ -34,32 +34,35 @@ void bench_sync(int num_workers, uint64_t file_size) {
   // TODO: Initialize files offline.
   std::vector<std::thread> threads;
   for (uint64_t i=0; i < num_workers; i++) {
-    threads.push_back(std::thread(read_sync, getWorkerDataFileName(i), file_size));
+    // threads.push_back(std::thread(read_sync, getWorkerDataFileName(i), file_size));
+    read_sync(getWorkerDataFileName(i), file_size);
   }
   for (uint64_t i=0; i < num_workers; i++) {
-    threads[i].join();
+    //threads[i].join();
   }
 }
 
 int main() {
-  json input;
-  input["file_size"] = (uint64_t)(4ULL << 30);
-  input["num_workers"] = 8;
-  input["should_init_data"] = true;
-  input["ioengine"] = "sync";
+  json options;
+  options["file_size"] = (uint64_t)(4ULL << 30);
+  options["num_workers"] = 4;
+  options["should_init_data"] = false;
+  options["ioengine"] = "iou";
+  options["sqthread_poll"] = true;
+  options["sqthread_poll_pin"] = true;
   
-  uint64_t file_size = input["file_size"]; // (1ULL << 30);
-  int num_workers = input["num_workers"]; // 8;
-  bool should_init_data = input["should_init_data"];
+  uint64_t file_size = options["file_size"]; // (1ULL << 30);
+  int num_workers = options["num_workers"]; // 8;
+  bool should_init_data = options["should_init_data"];
 
   if (should_init_data) {
     init_data(num_workers, file_size);
   }
   auto begin = high_resolution_clock::now(); 
-  if (input["ioengine"] == "sync") {
+  if (options["ioengine"] == "sync") {
     bench_sync(num_workers, file_size);
-  } else if (input["ioengine"] == "iou") {
-    bench_iou(num_workers, file_size);
+  } else if (options["ioengine"] == "iou") {
+    bench_iou(num_workers, file_size, options);
   } else {
     abort();
   }
