@@ -7,6 +7,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include "common.h"
+#include <fstream>
 using json = nlohmann::json;
 using namespace std;
 using namespace chrono;
@@ -34,22 +35,22 @@ void bench_sync(int num_workers, uint64_t file_size) {
   // TODO: Initialize files offline.
   std::vector<std::thread> threads;
   for (uint64_t i=0; i < num_workers; i++) {
-    // threads.push_back(std::thread(read_sync, getWorkerDataFileName(i), file_size));
-    read_sync(getWorkerDataFileName(i), file_size);
+    threads.push_back(std::thread(read_sync, getWorkerDataFileName(i), file_size));
   }
   for (uint64_t i=0; i < num_workers; i++) {
-    //threads[i].join();
+    threads[i].join();
   }
 }
 
-int main() {
-  json options;
-  options["file_size"] = (uint64_t)(4ULL << 30);
-  options["num_workers"] = 4;
-  options["should_init_data"] = false;
-  options["ioengine"] = "iou";
-  options["sqthread_poll"] = true;
-  options["sqthread_poll_pin"] = true;
+int main(int argc, char **argv) {
+  if (argc < 2) {
+      fprintf(stderr, "Please specify input benchmark JSON spec file");
+      abort();
+  }
+  std::string options_path(argv[1]);
+  std::ifstream options_ifstream(options_path);
+  json options  = json::parse(options_ifstream);
+
   
   uint64_t file_size = options["file_size"]; // (1ULL << 30);
   int num_workers = options["num_workers"]; // 8;
@@ -69,5 +70,5 @@ int main() {
   auto end = high_resolution_clock::now(); 
   auto duration = duration_cast<nanoseconds>(end-begin).count();
   float bw = (1e9 * num_workers * (file_size / (1ULL << 20))) / duration;
-  printf("Duration: %lld\n Bandwitdh: %lf\n", duration, bw);
+  printf("%lf\n", bw);
 }
