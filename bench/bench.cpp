@@ -14,26 +14,19 @@ using namespace chrono;
 #include "bench_io_uring.h"
 
 void read_sync(std::string filename, uint64_t size) {
-  char buf[BLOCK_SIZE];
+  char buf[BS];
   int fd = open(filename.c_str(), O_RDONLY | O_DIRECT);
   uint64_t x = 0;
-  for (uint64_t i=0; i < size; i+=BLOCK_SIZE) {
-    read(fd, buf, 4096);
-    for (int j=0; j < BLOCK_SIZE; j+=8) {
-      uint64_t b = *(uint64_t *)(buf + j);
-      x = x ^ b;
-    } 
+  uint64_t block_id = 0;
+  for (uint64_t i=0; i < size; i+=BS) {
+    int bytes_read = 0;
+    while (bytes_read < BS) {
+        bytes_read += read(fd, buf, 4096);
+    }
+    check_block(buf, block_id++);
   }
   fprintf(stderr, "checksum: %lld\n", x);
   close(fd);
-}
-
-void init_data(int num_workers, uint64_t file_size) {
-  // Setup input files for each worker
-  // TODO: Initialize files offline.
-  for (int i=0; i < num_workers; i++) {
-    create_data_file(getWorkerDataFileName(i), file_size);
-  }
 }
 
 void bench_sync(int num_workers, uint64_t file_size) {
@@ -50,11 +43,10 @@ void bench_sync(int num_workers, uint64_t file_size) {
 
 int main() {
   json input;
-  input["file_size"] = (1ULL << 30);
-  input["num_workers"] = 1;
+  input["file_size"] = (uint64_t)(4ULL << 30);
+  input["num_workers"] = 8;
   input["should_init_data"] = true;
   input["ioengine"] = "sync";
-  input["ioengine"] = "iou";
   
   uint64_t file_size = input["file_size"]; // (1ULL << 30);
   int num_workers = input["num_workers"]; // 8;
