@@ -36,7 +36,7 @@ io_depths = [32, 64, 128]
 # cpus_allowed = [1]
 # cpus_allowed = [1, 2, 4, 8, 16]
 MAX_CPU_ID=127
-cpus_allowed = [1, 4, 16, 64, 128] # Always leave last CPU open as extra thread for SQPollThread
+cpus_allowed = [4, 16, 64, 126] # Always leave last CPU open as extra thread for SQPollThread
 
 EXPERIMENT_LIST = {
     "CoresVsIOBandwidth": {
@@ -46,7 +46,7 @@ EXPERIMENT_LIST = {
         "iou+k(+2)": {"flags": ["--ioengine=io_uring", "--sqthread_poll", "--filename=data/input_data"], 'extra_cpus': 2},
         "iou+k(+1)": {"flags": ["--ioengine=io_uring", "--sqthread_poll", "--filename=data/input_data"], 'extra_cpus': 1},
         "aio": {"flags": ["--ioengine=libaio", "--filename=data/input_data"]},
-        "spdk": {"flags": ["--ioengine=/users/prikshit/spdk/build/fio/spdk_nvme", "--filename=trtype=PCIe traddr=0000.c1.00.0 ns=1", "--thread=1"]}
+        "spdk": {"flags": ["--ioengine=/users/prikshit/spdk/build/fio/spdk_nvme", "--filename=trtype=PCIe traddr=0000.c1.00.0 ns=1", "--thread=1", "--norandommap=1"]}
     }
 }
 
@@ -88,6 +88,7 @@ def run_experiment(experiment_name, experiments):
 
                     print(" ".join(process))
                     result = subprocess.run(process, capture_output=True)
+                    print("Error: ", result.stderr)
                     result_json = json.loads(result.stdout)
                     result_json["test_name"] = tc_name
                     result_json["experiment_name"] = experiment_name
