@@ -35,20 +35,20 @@ io_depths = [32, 64, 128]
 # Number of CPU cores to be utilized to initiate fio task.
 # cpus_allowed = [1]
 # cpus_allowed = [1, 2, 4, 8, 16]
-MAX_CPU_ID=15
-cpus_allowed = [1, 2, 4, 6, 8, 10, 11, 12] # Always leave CPU 16 open as extra thread for SQPollThread
+MAX_CPU_ID=127
+cpus_allowed = [1, 4, 16, 64, 128] # Always leave last CPU open as extra thread for SQPollThread
 
 EXPERIMENT_LIST = {
     "CoresVsIOBandwidth": {
-        "iou": {"flags": ["--ioengine=io_uring"]},
-        "iou+p": {"flags": ["--ioengine=io_uring", "--hipri=1"]},
-        "iou+k": {"flags": ["--ioengine=io_uring", "--sqthread_poll"]},
-        "iou+k(+2)": {"flags": ["--ioengine=io_uring", "--sqthread_poll"], 'extra_cpus': 2},
-        "iou+k(+1)": {"flags": ["--ioengine=io_uring", "--sqthread_poll"], 'extra_cpus': 1},
-        "aio": {"flags": ["--ioengine=libaio"]},
+        "iou": {"flags": ["--ioengine=io_uring", "--filename=data/input_data"]},
+        "iou+p": {"flags": ["--ioengine=io_uring", "--hipri=1", "--filename=data/input_data"]},
+        "iou+k": {"flags": ["--ioengine=io_uring", "--sqthread_poll", "--filename=data/input_data"]},
+        "iou+k(+2)": {"flags": ["--ioengine=io_uring", "--sqthread_poll", "--filename=data/input_data"], 'extra_cpus': 2},
+        "iou+k(+1)": {"flags": ["--ioengine=io_uring", "--sqthread_poll", "--filename=data/input_data"], 'extra_cpus': 1},
+        "aio": {"flags": ["--ioengine=libaio", "--filename=data/input_data"]},
+        "spdk": {"flags": ["--ioengine=/users/prikshit/spdk/build/fio/spdk_nvme", "--filename=trtype=PCIe traddr=0000.c1.00.0 ns=1", "--thread=1"]}
     }
 }
-
 
 os.makedirs("data", exist_ok=True)
 
@@ -82,7 +82,6 @@ def run_experiment(experiment_name, experiments):
                     process += ["--readwrite=" + workload]
                     # Since we run sequentially, its ok to reuse the name
                     process += [f"--name={experiment_name}_{tc_name}"]
-                    process += ["--filename=data/input_data"]
                     process += [f"--numjobs={cpus}"]
                     process += [f"--cpus_allowed=0-{total_cpus - 1}"]  # CPUs start with 0.
                     process += params["flags"]
